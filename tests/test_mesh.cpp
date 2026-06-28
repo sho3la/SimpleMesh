@@ -10,8 +10,18 @@
 #include "simplemesh/PreMesh.h"
 #include <iostream>
 #include <fstream>
+#include <string>
 #include <vector>
 #include <cmath>
+
+// Round-trip I/O tests write scratch meshes; route them into the build-tree
+// scratch dir (set by CMake) so they never land in the source tree / repo root.
+#ifndef SM_SCRATCH_DIR
+#define SM_SCRATCH_DIR "."
+#endif
+static std::string scratch(const std::string& name) {
+    return std::string(SM_SCRATCH_DIR) + "/" + name;
+}
 
 static int failures = 0;
 #define CHECK(cond, msg)                                                  \
@@ -289,25 +299,25 @@ int main() {
         src.add_face({v[2],v[3],v[7],v[6]}); src.add_face({v[3],v[0],v[4],v[7]});
 
         // PLY ASCII round trip preserves the quad mesh exactly
-        src.write_ply("rt_ascii.ply", false);
-        Mesh a; a.read_ply("rt_ascii.ply");
+        src.write_ply(scratch("rt_ascii.ply"), false);
+        Mesh a; a.read_ply(scratch("rt_ascii.ply"));
         CHECK(a.n_vertices() == 8 && a.n_faces() == 6, "PLY ascii round trip: 8 verts, 6 quads");
 
         // PLY binary round trip likewise
-        src.write_ply("rt_bin.ply", true);
-        Mesh b; b.read_ply("rt_bin.ply");
+        src.write_ply(scratch("rt_bin.ply"), true);
+        Mesh b; b.read_ply(scratch("rt_bin.ply"));
         CHECK(b.n_vertices() == 8 && b.n_faces() == 6, "PLY binary round trip: 8 verts, 6 quads");
 
         // STL binary: quads get fan-triangulated (6 quads -> 12 tris); the
         // reader welds the 36 corners back into 8 shared vertices.
-        src.write_stl("rt.stl", true);
-        Mesh s; s.read_stl("rt.stl");
+        src.write_stl(scratch("rt.stl"), true);
+        Mesh s; s.read_stl(scratch("rt.stl"));
         CHECK(s.n_vertices() == 8, "STL round trip welds to 8 vertices");
         CHECK(s.n_faces() == 12, "STL round trip yields 12 triangles");
 
         // STL ASCII path too
-        src.write_stl("rt_ascii.stl", false);
-        Mesh s2; s2.read_stl("rt_ascii.stl");
+        src.write_stl(scratch("rt_ascii.stl"), false);
+        Mesh s2; s2.read_stl(scratch("rt_ascii.stl"));
         CHECK(s2.n_vertices() == 8 && s2.n_faces() == 12, "STL ascii round trip matches binary");
     }
 
@@ -383,8 +393,8 @@ int main() {
         CHECK(std::abs(m.surface_area() - 4.0) < 1e-9, "triangulate preserves area");
 
         // OFF round trip
-        m.write_off("rt.off");
-        Mesh o; o.read_off("rt.off");
+        m.write_off(scratch("rt.off"));
+        Mesh o; o.read_off(scratch("rt.off"));
         CHECK(o.n_vertices() == 4 && o.n_faces() == 2, "OFF round trip: 4 verts, 2 tris");
     }
 
@@ -949,12 +959,12 @@ int main() {
     // --- OBJ + OFF round trips (complete the I/O matrix) ------------------
     {
         Mesh src = make_tetra();
-        src.write_obj("rt2.obj");
-        Mesh a; CHECK(a.read_obj("rt2.obj"), "OBJ read returns true");
+        src.write_obj(scratch("rt2.obj"));
+        Mesh a; CHECK(a.read_obj(scratch("rt2.obj")), "OBJ read returns true");
         CHECK(a.n_vertices() == 4 && a.n_faces() == 4, "OBJ round trip: 4 verts, 4 faces");
 
-        src.write_off("rt2.off");
-        Mesh b; CHECK(b.read_off("rt2.off"), "OFF read returns true");
+        src.write_off(scratch("rt2.off"));
+        Mesh b; CHECK(b.read_off(scratch("rt2.off")), "OFF read returns true");
         CHECK(b.n_vertices() == 4 && b.n_faces() == 4, "OFF round trip: 4 verts, 4 faces");
     }
 
@@ -1107,16 +1117,16 @@ int main() {
     {
         // write a non-manifold "spine" OBJ, load as soup, inspect, repair
         {
-            std::ofstream o("rt_spine.obj");
+            std::ofstream o(scratch("rt_spine.obj"));
             o << "v 0 0 0\nv 1 0 0\nv 0 1 0\nv 0 -1 0\nv 0 0 1\n";
             o << "f 1 2 3\nf 1 2 4\nf 1 2 5\n";          // edge 1-2 shared by 3 faces
         }
-        PreMesh p = sm::load_soup("rt_spine.obj");
+        PreMesh p = sm::load_soup(scratch("rt_spine.obj"));
         CHECK(p.n_faces() == 3, "load_soup(OBJ): 3 faces, nothing dropped");
         p.build_radial();
         CHECK(p.edge_valence(0, 1) == 3, "load_soup: edge 0-1 has radial valence 3");
 
-        Mesh clean = sm::load_and_repair("rt_spine.obj");
+        Mesh clean = sm::load_and_repair(scratch("rt_spine.obj"));
         CHECK(clean.n_faces() == 3, "load_and_repair recovers all 3 faces");
         CHECK(MeshChecker(clean).check().is_manifold, "load_and_repair output is manifold");
 

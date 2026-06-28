@@ -1,0 +1,10 @@
+# tangent_touch.obj
+# Two triangles touching at one point. Boundary (vertex) contact only.
+v 0 0 0
+v 1 0 0
+v 0 1 0
+v 0 0 0
+v -1 0 0.0001
+v 0 -1 1
+f 1 2 3
+f 4 5 6

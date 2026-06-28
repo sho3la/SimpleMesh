@@ -1,0 +1,10 @@
+# two_tris_cross.obj
+# Two triangles crossing in an X. EXPECT exactly one intersecting pair.
+v 0 0 0
+v 2 0 0
+v 0 2 0
+v 0.5 0.5 -1
+v 0.5 0.5 1
+v 1.5 0.5 0
+f 1 2 3
+f 4 5 6
