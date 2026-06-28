@@ -1,0 +1,33 @@
+# build output
+/build/
+build/
+*.pyd
+*.so
+*.dll
+*.o
+*.obj
+*.lib
+*.a
+
+# Python
+__pycache__/
+*.egg-info/
+dist/
+.venv/
+
+# example / test outputs
+examples/*.obj
+examples/*.ply
+examples/*.stl
+examples/*.off
+/rt*.off
+/rt*.stl
+/rt*.ply
+/subdivided.ply
+/decimated.ply
+/cube_from_python.obj
+
+# editor / OS
+.vscode/
+.idea/
+.DS_Store

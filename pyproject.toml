@@ -1,0 +1,34 @@
+[build-system]
+requires = ["scikit-build-core>=0.8", "pybind11>=2.12"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "simplemesh"
+version = "0.1.0"
+description = "A teaching-oriented half-edge mesh library (C++ core, Python API)"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "BSD-3-Clause" }
+authors = [{ name = "Mohamed Shaalan" }]
+keywords = ["mesh", "halfedge", "geometry-processing", "mesh-repair", "pybind11"]
+classifiers = [
+    "Programming Language :: C++",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "License :: OSI Approved :: BSD License",
+]
+dependencies = ["numpy"]
+
+[project.urls]
+Homepage = "https://github.com/mohamedsh3lan/SimpleMesh"
+Source = "https://github.com/mohamedsh3lan/SimpleMesh"
+
+# scikit-build-core drives CMake to build the `simplemesh` extension and packs
+# the installed module into the wheel.  `pip install .`  just works.
+[tool.scikit-build]
+minimum-version = "0.8"
+cmake.version = ">=3.18"
+cmake.build-type = "Release"
+# Build only the Python module for wheels (skip the demo / test executables).
+cmake.args = ["-DSIMPLEMESH_BUILD_APPS=OFF"]
+wheel.expand-macos-universal-tags = true
