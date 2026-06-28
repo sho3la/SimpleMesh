@@ -101,7 +101,12 @@ int weld(const Soup& s, double tol, std::vector<int>& vmap) {
 // Returns the number of faces flipped. (Edges shared by != 2 faces are skipped -
 // non-manifold seams can't be coherently oriented.)
 int reorient(std::vector<std::vector<int>>& faces) {
-    auto ekey = [](int a, int b) { return std::minmax(a, b); };
+    // Canonical undirected-edge key. Note: std::minmax returns a pair of
+    // *references* to its arguments, so returning it from a lambda would dangle;
+    // build the pair from values instead.
+    auto ekey = [](int a, int b) {
+        return std::make_pair(std::min(a, b), std::max(a, b));
+    };
     // undirected edge -> the (face, directed a->b) records touching it
     std::map<std::pair<int,int>, std::vector<std::tuple<int,int,int>>> edge2;
     for (int f = 0; f < (int)faces.size(); ++f) {

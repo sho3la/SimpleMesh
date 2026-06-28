@@ -27,6 +27,15 @@ examples/*.off
 /decimated.ply
 /cube_from_python.obj
 
+# data/ holds tracked mesh FIXTURES. The global *.obj above is for MSVC object
+# files; re-include Wavefront .obj (and friends) under data/ so fixtures track.
+!data/
+!data/**/
+!data/**/*.obj
+!data/**/*.off
+!data/**/*.stl
+!data/**/*.ply
+
 # editor / OS
 .vscode/
 .idea/
